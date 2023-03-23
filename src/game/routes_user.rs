@@ -4,7 +4,7 @@ use crate::game::*;
 use crate::api_error::ApiError;
 
 use actix_web::{ post, web,  HttpResponse, HttpRequest};
-use jsonwebtoken::{ encode, Header, EncodingKey};
+use jsonwebtoken::{ encode, decode, Header, EncodingKey, DecodingKey, Validation};
 
 
 #[post("/login")]
@@ -33,7 +33,7 @@ pub async fn sign_in(credentials: web::Json<UserAuthentication>) -> Result<HttpR
 
         let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-        let my_claims = Claims::from_user(&user, false); //Creation du corps du token
+        let my_claims = Claims::from_user(&user); //Creation du corps du token
 
         let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).unwrap(); //Creation du jwt
 
@@ -58,9 +58,45 @@ async fn create_user(user: web::Json<UserAuthentication>) -> Result<HttpResponse
     let user = user.into_inner();
 
     let user = User::create(user)?;
+
+    let _ = Score::create(user.username.clone())?;
+
     Ok(HttpResponse::Ok().json(user))
 
  
+}
+
+#[post("/snake")]
+async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) -> Result<HttpResponse, ApiError>  {
+
+    let header = req.headers().get("Authorization").unwrap();
+
+    let headerhttp = header.to_str().unwrap();
+
+    let jwt = headerhttp.split("Bearer ").collect::<Vec<&str>>()[1];
+
+    let _claim = decode::<Claims>(jwt, &DecodingKey::from_secret("un big secret jwt".as_ref()), &Validation::default()).unwrap();
+
+    let score = score.into_inner();
+
+    let _ = Score::update_score(score.username.clone(), score.score)?;
+
+    let score = Score::get_score(score.username)?;
+
+    Ok(HttpResponse::Ok().json(score))
+
+
+
+}
+
+#[post("/snake/top")]
+
+async fn get_top_snake() -> Result<HttpResponse, ApiError>  {
+
+    let top = Score::get_score_top()?;
+
+    Ok(HttpResponse::Ok().json(top))
+
 }
 
 

@@ -12,7 +12,6 @@ use chacha20poly1305::aead::{Aead, NewAead};
 use time::{Duration, OffsetDateTime};
 use argon2::Config;
 use rand::Rng;
-use jsonwebtoken::{decode,  DecodingKey, Validation, Algorithm};
 
 
 #[derive(Serialize, Deserialize)]
@@ -86,7 +85,7 @@ pub fn chiffrer_password(password : String) -> Vec<u8> { //Fct pour chiffrer le 
 
  impl Claims {
 
-    pub fn from_user(user : &UserEnvoye, verif : bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
+    pub fn from_user(user : &UserEnvoye) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
 
         let iat1 = OffsetDateTime::now_utc();
         let exp1 = iat1 + Duration::hours(10);
