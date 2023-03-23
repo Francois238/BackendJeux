@@ -71,6 +71,8 @@ async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) 
 
     let header = req.headers().get("Authorization").unwrap();
 
+    print!("on a le header bearer");
+
     let headerhttp = header.to_str().unwrap();
 
     let jwt = headerhttp.split("Bearer ").collect::<Vec<&str>>()[1];
