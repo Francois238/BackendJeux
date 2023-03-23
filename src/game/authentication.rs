@@ -41,7 +41,7 @@ pub struct UserEnvoye { //Structure a envoye dans la reponse http de l'admin
 }
 
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Claims {  //Struture composant le JWT
     pub id: i32,
     pub username: String,

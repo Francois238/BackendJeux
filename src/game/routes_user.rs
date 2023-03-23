@@ -75,7 +75,10 @@ async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) 
 
     let jwt = headerhttp.split("Bearer ").collect::<Vec<&str>>()[1];
 
-    let _claim = decode::<Claims>(jwt, &DecodingKey::from_secret("un big secret jwt".as_ref()), &Validation::default()).unwrap();
+    let claim = decode::<Claims>(jwt, &DecodingKey::from_secret("un big secret jwt".as_ref()), &Validation::default()).unwrap();
+
+    print!("{:?}", claim);
+    print!("claim ok");
 
     let score = score.into_inner();
 
