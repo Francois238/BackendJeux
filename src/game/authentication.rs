@@ -5,6 +5,7 @@ use std::env;
 use crate::api_error::ApiError;
 use crate::db;
 use crate::schema::users;
+use actix_web::HttpRequest;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce};
@@ -12,6 +13,7 @@ use chacha20poly1305::aead::{Aead, NewAead};
 use time::{Duration, OffsetDateTime};
 use argon2::Config;
 use rand::Rng;
+use jsonwebtoken::{ decode, DecodingKey, Validation};
 
 
 #[derive(Serialize, Deserialize)]
@@ -204,7 +206,44 @@ impl User {
 }
 
 
+pub fn verifier_session(req : HttpRequest) -> Option<Claims> { //Fct pour verifier valider du JWT
 
+    let session = req.headers().get("Authorization");
+
+    let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
+
+    match session {
+
+        Some(header_value) => {
+
+            let header_http = header_value.to_str();
+            
+
+            match header_http {
+
+                Ok(data) =>{
+                    let jwt = data.split("Bearer ").collect::<Vec<&str>>()[1];
+
+                    let claim = decode::<Claims>(jwt, &DecodingKey::from_secret(secret.as_ref()), &Validation::default());
+
+                    match claim{
+                        Ok(result) => {
+                            let my_claims = result.claims;
+
+                            Some(my_claims)
+                        },
+                        _=> None
+                    }
+
+                },
+                _ => None
+            }
+
+
+        },
+        _ => None
+    }
+}
 
 
  mod jwt_numeric_date {

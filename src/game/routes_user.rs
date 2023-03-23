@@ -67,26 +67,17 @@ async fn create_user(user: web::Json<UserAuthentication>) -> Result<HttpResponse
 }
 
 #[patch("/snake")]
-async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) -> Result<HttpResponse, ApiError>  {
+async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreRecu>) -> Result<HttpResponse, ApiError>  {
 
-    let header = req.headers().get("Authorization").unwrap();
+    let claims = verifier_session(req).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
-    print!("on a le header bearer");
-
-    let headerhttp = header.to_str().unwrap();
-
-    let jwt = headerhttp.split("Bearer ").collect::<Vec<&str>>()[1];
-
-    let claim = decode::<Claims>(jwt, &DecodingKey::from_secret("un big secret jwt".as_ref()), &Validation::default()).unwrap();
-
-    print!("{:?}", claim);
-    print!("claim ok");
+    let username = claims.username;
 
     let score = score.into_inner();
 
-    let _ = Score::update_score(score.username.clone(), score.score)?;
+    let _ = Score::update_score(username.clone(), score.score)?;
 
-    let score = Score::get_score(score.username)?;
+    let score = Score::get_score(username)?;
 
     Ok(HttpResponse::Ok().json(score))
 
@@ -98,13 +89,7 @@ async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) 
 
 async fn get_top_snake(req : HttpRequest) -> Result<HttpResponse, ApiError>  {
 
-    let header = req.headers().get("Authorization").unwrap();
-
-    let headerhttp = header.to_str().unwrap();
-
-    let jwt = headerhttp.split("Bearer ").collect::<Vec<&str>>()[1];
-
-    let _claim = decode::<Claims>(jwt, &DecodingKey::from_secret("un big secret jwt".as_ref()), &Validation::default()).unwrap();
+    let _claims = verifier_session(req).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
 
     let top = Score::get_score_top()?;

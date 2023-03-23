@@ -12,6 +12,13 @@ pub struct ScoreJoueur { //Structure inseree en BDD pour ajouter un user
     pub score: i32,
 }
 
+
+#[derive(Insertable, Serialize, Deserialize)]
+#[diesel(table_name = snake)]
+pub struct ScoreRecu { //Structure inseree en BDD pour modifier un score
+    pub score: i32,
+}
+
 #[derive( Queryable)]
 pub struct Score { //Structure recupere par requete BDD
     pub id: i32,
