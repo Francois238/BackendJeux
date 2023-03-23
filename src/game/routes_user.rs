@@ -3,7 +3,7 @@ use std::env;
 use crate::game::*;
 use crate::api_error::ApiError;
 
-use actix_web::{ post, web,  HttpResponse, HttpRequest};
+use actix_web::{ post,patch, get, web,  HttpResponse, HttpRequest};
 use jsonwebtoken::{ encode, decode, Header, EncodingKey, DecodingKey, Validation};
 
 
@@ -66,7 +66,7 @@ async fn create_user(user: web::Json<UserAuthentication>) -> Result<HttpResponse
  
 }
 
-#[post("/snake")]
+#[patch("/snake")]
 async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) -> Result<HttpResponse, ApiError>  {
 
     let header = req.headers().get("Authorization").unwrap();
@@ -89,9 +89,18 @@ async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreJoueur>) 
 
 }
 
-#[post("/snake/top")]
+#[get("/snake/top")]
 
-async fn get_top_snake() -> Result<HttpResponse, ApiError>  {
+async fn get_top_snake(req : HttpRequest) -> Result<HttpResponse, ApiError>  {
+
+    let header = req.headers().get("Authorization").unwrap();
+
+    let headerhttp = header.to_str().unwrap();
+
+    let jwt = headerhttp.split("Bearer ").collect::<Vec<&str>>()[1];
+
+    let _claim = decode::<Claims>(jwt, &DecodingKey::from_secret("un big secret jwt".as_ref()), &Validation::default()).unwrap();
+
 
     let top = Score::get_score_top()?;
 
@@ -104,5 +113,7 @@ async fn get_top_snake() -> Result<HttpResponse, ApiError>  {
 pub fn routes_user(cfg: &mut web::ServiceConfig) {
     cfg.service(sign_in);
     cfg.service(create_user);
+    cfg.service(update_score_snake);
+    cfg.service(get_top_snake);
 
 }
