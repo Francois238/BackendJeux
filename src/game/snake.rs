@@ -51,11 +51,21 @@ impl Score{
 
         let mut connection = db::connection()?;
 
-        let score= diesel::update(snake::table.filter(snake::username.eq(user)))
+        let old_score = snake::table
+            .filter(snake::username.eq(user.clone()))
+            .first::<Score>(&mut connection)?;
+
+        if old_score.score > score { //Si le score est plus petit que l'ancien, on ne fait rien
+            let score= diesel::update(snake::table.filter(snake::username.eq(user)))
             .set(snake::score.eq(score))
             .execute(&mut connection)?;
 
-        Ok(score)
+            Ok(score)
+        }
+
+        else{
+            Ok(0)
+        }
 
     }
 

@@ -4,7 +4,7 @@ use crate::game::*;
 use crate::api_error::ApiError;
 
 use actix_web::{ post,patch, get, web,  HttpResponse, HttpRequest};
-use jsonwebtoken::{ encode, decode, Header, EncodingKey, DecodingKey, Validation};
+use jsonwebtoken::{ encode, Header, EncodingKey};
 
 
 #[post("/login")]
@@ -38,11 +38,14 @@ pub async fn sign_in(credentials: web::Json<UserAuthentication>) -> Result<HttpR
         let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).unwrap(); //Creation du jwt
 
         let tok = "Bearer ".to_string() + &token;
+        
 
         Ok(HttpResponse::Ok()
             .insert_header(("Authorization", tok))
+            .insert_header(("Access-Control-Expose-Headers", "Authorization"))
             .json(user)
         )
+
     }
     else {
 
@@ -90,7 +93,6 @@ async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreRecu>) ->
 async fn get_top_snake(req : HttpRequest) -> Result<HttpResponse, ApiError>  {
 
     let _claims = verifier_session(req).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
-
 
     let top = Score::get_score_top()?;
 
