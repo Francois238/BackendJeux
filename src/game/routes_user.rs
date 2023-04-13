@@ -88,6 +88,18 @@ async fn update_score_snake(req : HttpRequest, score :  web::Json<ScoreRecu>) ->
 
 }
 
+#[get("/snake/me")]
+
+async fn get_ranking(req : HttpRequest) -> Result<HttpResponse, ApiError>  {
+
+    let claims = verifier_session(req).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+
+    let top = Score::get_ranking(claims.username)?;
+
+    Ok(HttpResponse::Ok().json(top))
+
+}
+
 #[get("/snake/top")]
 
 async fn get_top_snake(req : HttpRequest) -> Result<HttpResponse, ApiError>  {
@@ -106,6 +118,7 @@ pub fn routes_user(cfg: &mut web::ServiceConfig) {
     cfg.service(sign_in);
     cfg.service(create_user);
     cfg.service(update_score_snake);
+    cfg.service(get_ranking);
     cfg.service(get_top_snake);
 
 }
