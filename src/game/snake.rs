@@ -55,7 +55,7 @@ impl Score{
             .filter(snake::username.eq(user.clone()))
             .first::<Score>(&mut connection)?;
 
-        if old_score.score > score { //Si le score est plus petit que l'ancien, on ne fait rien
+        if old_score.score < score { //Si le score est plus grand on update
             let score= diesel::update(snake::table.filter(snake::username.eq(user)))
             .set(snake::score.eq(score))
             .execute(&mut connection)?;
