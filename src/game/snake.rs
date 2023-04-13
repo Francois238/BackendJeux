@@ -27,14 +27,6 @@ pub struct Score { //Structure recupere par requete BDD
 }
 
 
-#[derive( Serialize, Deserialize)]
-pub struct RangJoueur { //Structure recupere par requete BDD
-    pub username : String,
-    pub score: i32,
-    pub rang: i32,
-}
-
-
 impl Score{
 
     pub fn create(user: String) -> Result<(), ApiError> { 
@@ -91,29 +83,6 @@ impl Score{
         })
 
     }
-
-    pub fn get_ranking(user: String) -> Result<RangJoueur, ApiError> { 
-
-        let mut connection = db::connection()?;
-
-        let score = snake::table
-            .filter(snake::username.eq(user.clone()))
-            .first::<Score>(&mut connection)?;
-
-        let rang: i64 = snake::table
-            .select(diesel::dsl::count(snake::score))
-            .filter(snake::score.gt(score.score))
-            .group_by(snake::score)
-            .get_result(&mut connection)?;
-
-        Ok(RangJoueur {
-            username: user,
-            score: score.score,
-            rang: rang as i32 +1,
-        })
-
-    }
-
 
 
     pub fn get_score_top() -> Result<Vec<ScoreJoueur>, ApiError> { 

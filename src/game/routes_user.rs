@@ -94,7 +94,7 @@ async fn get_ranking(req : HttpRequest) -> Result<HttpResponse, ApiError>  {
 
     let claims = verifier_session(req).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
-    let top = Score::get_ranking(claims.username)?;
+    let top = Score::get_score(claims.username)?;
 
     Ok(HttpResponse::Ok().json(top))
 
