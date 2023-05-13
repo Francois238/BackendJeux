@@ -10,5 +10,6 @@ Modifiez la 1ère ligne du fichier .env en remplacer le mot de passe 'password' 
 Installer diesel : `cargo install diesel_cli`  
 Entrez : `diesel migration run`
  
-## Lancement du programme 
+## Lancement du programme  
+Merci de bien changer les mots de passes dans le fichier .env  
 Entrez `cargo run`
